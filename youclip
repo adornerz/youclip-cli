@@ -1,0 +1,140 @@
+#! /usr/bin/env python3
+
+import argparse
+import textwrap
+from pytube import YouTube
+from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
+
+print("""
+__   __           ____ _ _       
+\ \ / /__  _   _ / ___| (_)_ __  
+ \ V / _ \| | | | |   | | | '_ \ 
+  | | (_) | |_| | |___| | | |_) |
+  |_|\___/ \__,_|\____|_|_| .__/ 
+                          |_|    
+YouClip CLI: Developed by ador
+
+
+""")
+
+# Parse the arguments from the CLI
+parser = argparse.ArgumentParser(
+    prog='youclip',
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    epilog=textwrap.dedent('''\
+Usage:  `youclip -u {youtube video URL} startTime endTime` for youtube videos
+        `youclip -l {local video path} startTime endTime` for local videos]
+
+Examples:   `youclip -u https://www.youtube.com/watch?v=dQw4w9WgXcQ 01:23 03:17
+            `youclip -l ~/Downloads/somevideo.mp4 01:23 03:17
+    ''')
+)
+
+parser.add_argument('-u', '--url', help='url of the youtube video to clip')
+parser.add_argument('-l',  '--local', help='path of local video to clip')
+
+parser.add_argument('start', help='start minute of the clip (e.g: 1:09)')
+parser.add_argument('end', help='end minute of the clip (e.g: 7:00)')
+args = parser.parse_args()
+
+# Color to emphasize stuff on logs
+
+
+class color:
+    GREEN = '\033[92m'
+    RED = '\033[91m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    END = '\033[0m'
+
+# preset to avoid code repetition, imagine the prints with these beforehand
+
+
+class logs:
+    ERR = f"{color.BOLD}[ERR]{color.END}"
+    INFO = f"{color.BOLD}[INFO]{color.END}"
+    SUCCESS = f"{color.BOLD}[SUCCESS]{color.END}"
+
+# Convert inputted time to seconds because ffmpeg accepts seconds
+
+
+def TimeToSeconds(time):
+    t = time.split(':')
+    return int(t[0])*60 + int(t[1])
+
+
+# Download video from youtube
+def DownloadYt(url):
+    try:
+        video = YouTube(url)
+    except:
+        print(f"{logs.ERR}{color.RED} Couldn't connect to youtube. {color.END}")
+        return False
+
+    try:
+        print(f'{logs.INFO} Video title: ', video.title)
+        print(f'{logs.INFO} Downloading the video...')
+        video.streams.filter(progressive=True, file_extension='mp4').order_by(
+            'resolution')[-1].download('./')
+    except:
+        print(f"{logs.ERR} {color.RED} Error downloading the video. {color.END}")
+
+    print('{logs.SUCCESS} Video Downloaded!')
+    return video.title
+
+
+def ClipVideo(title, start, end):
+    try:
+        print('-----------------------------')
+        ffmpeg_extract_subclip(
+            title, start, end, targetname=f'{title}-cropped.mp4')
+        print('-----------------------------')
+        print(f'{logs.SUCCESS}{color.GREEN} Video successfully clipped! {color.END}')
+        print(f'{logs.INFO}{color.GREEN} Video saved as: {color.UNDERLINE}{color.BOLD}{title}-cropped.mp4{color.END}{color.GREEN} in the same path as the video source. {color.END}')
+        return True
+    except Exception as e:
+        print(
+            f'{logs.ERR}{color.RED} Some error occurred when clipping the video. {color.END}')
+        print(f'{logs.ERR}{color.RED} Error: {e} {color.END}')
+
+        return False
+
+
+if args.url == None and args.local == None:
+    print(f'{logs.ERR}{color.RED} Give a youtube URL or a path of local video to clip! {color.END}')
+elif args.url != None and args.local != None:
+    print(f'{logs.ERR}{color.RED} You can only give a youtube URL *OR* a local video path at a time! {color.END}')
+
+elif args.url != None:
+    print(f'{color.BOLD}[START]{color.END} Clipping youtube video')
+    title = DownloadYt(args.url)
+    if title != False:
+        # if last character of the video title is a dot (.), when downloaded it gets removed and this
+        # confuses the moviepy when trying to find the file, so we remove the last character from the title
+        if title[len(title)-1] == '.':
+            title = title[:-1]
+
+        res = ClipVideo(title + '.mp4', TimeToSeconds(args.start),
+                        TimeToSeconds(args.end))
+
+        if res:
+            print(
+                f'{logs.SUCCESS}{color.GREEN} Successfully exiting the program. {color.END}')
+        else:
+            print(
+                f'{logs.ERR}{color.RED} Exited with an error (while clipping) {color.END}')
+    else:
+        print(
+            f'{logs.ERR}{color.RED} Exited with an error (while downloading) {color.END}')
+
+
+elif args.local != None:
+    print(f'{color.BOLD}[START]{color.END} Clipping local file')
+    title = args.local
+    res = ClipVideo(title, TimeToSeconds(args.start), TimeToSeconds(args.end))
+    if res:
+        print(
+            f'{logs.SUCCESS}{color.GREEN} Successfully exiting the program. {color.END}')
+    else:
+        print(
+            f'{logs.ERR}{color.RED} Exited with an error (while clipping) {color.END}')
