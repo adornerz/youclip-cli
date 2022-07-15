@@ -20,8 +20,8 @@ parser = argparse.ArgumentParser(
     prog='youclip',
     formatter_class=argparse.RawDescriptionHelpFormatter,
     epilog=textwrap.dedent('''\
-Usage:  `youclip -u {youtube video URL} startTime endTime` for youtube videos
-        `youclip -l {local video path} startTime endTime` for local videos]
+Usage:  `youclip -u {youtube video URL} MM:SS MM:SS` for youtube videos
+        `youclip -l {local video path} MM:SS MM:SS` for local videos
 
 Examples:   `youclip -u https://www.youtube.com/watch?v=dQw4w9WgXcQ 01:23 03:17
             `youclip -l ~/Downloads/somevideo.mp4 01:23 03:17
