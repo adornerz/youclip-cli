@@ -47,7 +47,7 @@ Step 1, 2 and 3 are the same as in the linux. <br>
 Step 4: remove the first line <br>
 Step 5: add the .py extension <br>
 
-*I will make the program globally usable in windows as well, just not today.
+*Add directory to PATH to use globally.
 ## Usage:
 
 Parametres:
