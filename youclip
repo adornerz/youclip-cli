@@ -57,6 +57,9 @@ def TimeToSeconds(time):
     return int(t[0])*60 + int(t[1])
 
 
+def stripTitle(title):
+    return title.replace('.', '').replace(':', '')
+
 # Download video from youtube
 def DownloadYt(url):
     try:
@@ -110,8 +113,8 @@ elif args.url != None:
         if title[len(title)-1] == '.':
             title = title[:-1]
 
-        res = ClipVideo(title + '.mp4', TimeToSeconds(args.start), TimeToSeconds(args.end))
-        DeleteLeftover(title)
+        res = ClipVideo(stripTitle(title) + '.mp4', TimeToSeconds(args.start), TimeToSeconds(args.end))
+        DeleteLeftover(stripTitle(title))
         if res:
             print(
                 f'{logs.SUCCESS}{color.GREEN} Successfully exiting the program. {color.END}')
@@ -120,7 +123,7 @@ elif args.url != None:
                 f'{logs.ERR}{color.RED} Exited with an error (while clipping) {color.END}')
     else:
         print(
-            f'{logs.ERR}{color.RED} Exited with an error (while downloading) {color.END}')
+            f'{logs.ERR}{color.RED} Exited w~ith an error (while downloading) {color.END}')
 
 
 elif args.local != None:
