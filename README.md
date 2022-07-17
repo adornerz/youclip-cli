@@ -7,8 +7,8 @@ you got the clip you wanted.
 
 ## Requirements:
 * Ideally a linux machine
-* python3
-* more than 5 working braincells
+* python 3
+* atleast than 5 working braincells
 
 NOTE: You _can_ use this on windows with some little differences explained below.
 
