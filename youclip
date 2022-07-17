@@ -1,5 +1,7 @@
 #! /usr/bin/python3
 
+from ast import Delete
+import os
 import argparse
 import textwrap
 from pytube import YouTube
@@ -36,8 +38,6 @@ parser.add_argument('end', help='end minute of the clip (e.g: 7:00)')
 args = parser.parse_args()
 
 # Color to emphasize stuff on logs
-
-
 class color:
     GREEN = '\033[92m'
     RED = '\033[91m'
@@ -46,16 +46,12 @@ class color:
     END = '\033[0m'
 
 # preset to avoid code repetition, imagine the prints with these beforehand
-
-
 class logs:
     ERR = f"{color.BOLD}[ERR]{color.END}"
     INFO = f"{color.BOLD}[INFO]{color.END}"
     SUCCESS = f"{color.BOLD}[SUCCESS]{color.END}"
 
 # Convert inputted time to seconds because ffmpeg accepts seconds
-
-
 def TimeToSeconds(time):
     t = time.split(':')
     return int(t[0])*60 + int(t[1])
@@ -72,20 +68,18 @@ def DownloadYt(url):
     try:
         print(f'{logs.INFO} Video title: ', video.title)
         print(f'{logs.INFO} Downloading the video...')
-        video.streams.filter(progressive=True, file_extension='mp4').order_by(
-            'resolution')[-1].download('./')
+        video.streams.filter(progressive=True, file_extension='mp4').order_by('resolution')[-1].download('./')
     except:
         print(f"{logs.ERR} {color.RED} Error downloading the video. {color.END}")
 
-    print('{logs.SUCCESS} Video Downloaded!')
+    print(f'{logs.SUCCESS} Video Downloaded!')
     return video.title
 
 
 def ClipVideo(title, start, end):
     try:
         print('-----------------------------')
-        ffmpeg_extract_subclip(
-            title, start, end, targetname=f'{title}-cropped.mp4')
+        ffmpeg_extract_subclip(title, start, end, targetname=f'{title}-cropped.mp4')
         print('-----------------------------')
         print(f'{logs.SUCCESS}{color.GREEN} Video successfully clipped! {color.END}')
         print(f'{logs.INFO}{color.GREEN} Video saved as: {color.UNDERLINE}{color.BOLD}{title}-cropped.mp4{color.END}{color.GREEN} in the same path as the video source. {color.END}')
@@ -97,6 +91,10 @@ def ClipVideo(title, start, end):
 
         return False
 
+
+def DeleteLeftover(title):
+    print(f'{logs.INFO} Deleting leftover file...')
+    os.remove(title + '.mp4')
 
 if args.url == None and args.local == None:
     print(f'{logs.ERR}{color.RED} Give a youtube URL or a path of local video to clip! {color.END}')
@@ -112,9 +110,8 @@ elif args.url != None:
         if title[len(title)-1] == '.':
             title = title[:-1]
 
-        res = ClipVideo(title + '.mp4', TimeToSeconds(args.start),
-                        TimeToSeconds(args.end))
-
+        res = ClipVideo(title + '.mp4', TimeToSeconds(args.start), TimeToSeconds(args.end))
+        DeleteLeftover(title)
         if res:
             print(
                 f'{logs.SUCCESS}{color.GREEN} Successfully exiting the program. {color.END}')
